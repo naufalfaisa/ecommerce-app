@@ -25,23 +25,39 @@ Sebuah aplikasi e-commerce berbasis Command Line Interface (CLI) menggunakan Pyt
    - E-Wallet
 - Melihat riwayat transaksi.
 
-## Struktur Kode
+## Struktur Folder dan Kode
 
-- `Pelanggan` & `Admin`: model untuk pengguna.
-- `Produk`: model produk dengan properti `nama`, `harga`, dan `stok`.
-- `Keranjang`: menyimpan produk yang ditambahkan pelanggan.
-- `Transaksi`: menyimpan data transaksi.
-- `Database`: abstraksi untuk SQLite.
-- Repository:
+```
+.
+├── Exceptions
+│   └── exceptions.py        # Semua custom exception aplikasi
+├── Models
+│   └── models.py            # Model untuk Produk, Pelanggan, Admin, Keranjang, Transaksi
+├── Repository
+│   └── repository.py        # Mengelola operasi database (CRUD) untuk user, produk, dan transaksi
+├── Services
+│   └── services.py          # Logika bisnis: AuthService, ProdukService, CheckoutService
+├── main.py                  # Entry point aplikasi CLI
+└── README.md
+```
+
+## Penjelasan Modul
+
+- Exceptions: Semua custom exception untuk error handling, misal `ProdukTidakDitemukanError`, `StokTidakCukupError`.
+- Models: Mewakili entitas utama aplikasi: `Produk`, `Pelanggan`, `Admin`, `Keranjang`, dan `Transaksi`.
+- Repository: Abstraksi database untuk operasi CRUD.
    - `UserRepository`: mengelola data pengguna.
    - `ProdukRepository`: mengelola data produk.
    - `TransaksiRepository`: mengelola data transaksi.
-- Service:
-   - `AuthService`: registrasi & login.
+- Services: Berisi logika bisnis.
+   - `AuthService`: registrasi & login pengguna.
    - `ProdukService`: tambah, update, hapus produk.
-   - `CheckoutService`: proses checkout & pembayaran.
-- Payment (polimorfisme):
-   - `CreditCard`, `COD`, `EWallet`.
-- `App`: CLI untuk interaksi pengguna.
+   - `CheckoutService`: proses checkout & pembayaran (Credit Card, COD, E-Wallet).
+- main.py: CLI untuk interaksi pengguna.
 
+## Pola dan Prinsip OOP
 
+- Encapsulation: Data model disimpan dalam class (`Produk`, `Pelanggan`) dan diakses melalui method.
+- Abstraction: `Repository` dan `Service` menyembunyikan kompleksitas database dan logika bisnis.
+- Inheritance: `Admin` dan `Pelanggan` mewarisi `User` (shared properties & methods).
+- Polymorphism: Sistem pembayaran mendukung metode berbeda (`CreditCard`, `COD`, `EWallet`) melalui interface yang sama.
