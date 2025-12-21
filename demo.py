@@ -140,9 +140,7 @@ class Transaksi:
             raise ValueError("Status tidak boleh kosong")
         self._status = value
 
-# =========================
-# DATABASE
-# =========================
+
 class Database:
     def __init__(self, name="ecommerce.db"):
         self._conn = sqlite3.connect(name)
