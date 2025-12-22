@@ -1,8 +1,12 @@
-
+# Models/models.py
 from Exceptions.exceptions import StokTidakCukupError
 
 
 class User:
+    """
+    Kelas dasar (parent) untuk semua jenis user.
+    """
+
     def __init__(self, id, username):
         self._id = id
         self._username = username
@@ -31,6 +35,9 @@ class Admin(User):
 
 
 class Produk:
+    """
+    Representasi produk di sistem.
+    """
     def __init__(self, id, nama, harga, stok):
         self._id = id
         self._nama = nama
@@ -75,25 +82,43 @@ class Produk:
 
 
 class Keranjang:
+    """
+    Menyimpan daftar produk yang ingin dibeli pelanggan.
+    """
     def __init__(self):
         self._items = {}
 
     def tambah(self, produk_id, qty):
+        """
+        Menambahkan produk ke keranjang.
+        """
         if qty <= 0:
             raise ValueError("Jumlah harus > 0")
         self._items[produk_id] = self._items.get(produk_id, 0) + qty
 
     def hapus(self, produk_id):
+        """
+        Menghapus produk tertentu dari keranjang.
+        """
         self._items.pop(produk_id, None)
 
     def kosongkan(self):
+        """
+        Mengosongkan seluruh isi keranjang (setelah checkout).
+        """
         self._items.clear()
 
     def get_items(self):
+        """
+        Mengembalikan salinan isi keranjang.
+        """
         return self._items.copy()
 
 
 class Transaksi:
+    """
+    Representasi transaksi pembayaran.
+    """
     def __init__(self, id, user_id, total, status):
         self._id = id
         self._user_id = user_id

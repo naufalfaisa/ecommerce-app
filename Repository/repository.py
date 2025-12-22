@@ -1,17 +1,24 @@
+# Repository/repository.py
 import hashlib
 import sqlite3
 
 from Models.models import Produk, Transaksi
-from Exceptions.exceptions import TransaksiSudahDibatalkanError, TransaksiTidakDitemukanError
+from Exceptions.exceptions import TransaksiTidakDitemukanError
 
 
 class Database:
+    """
+    Mengelola koneksi dan eksekusi database SQLite.
+    """
     def __init__(self, name="ecommerce.db"):
         self._conn = sqlite3.connect(name)
         self._cursor = self._conn.cursor()
         self._init()
 
     def _init(self):
+        """
+        Inisialisasi tabel dan akun admin default.
+        """
         self._cursor.execute("""
         CREATE TABLE IF NOT EXISTS users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,6 +51,7 @@ class Database:
             harga REAL
         )""")
         
+        # Membuat admin default jika belum ada
         self._cursor.execute("SELECT * FROM users WHERE role='admin'")
         if not self._cursor.fetchone():
             pw = hashlib.sha256("admin123".encode()).hexdigest()
@@ -54,19 +62,25 @@ class Database:
         self._conn.commit()
 
     def execute(self, q, p=()):
+        """Menjalankan query INSERT/UPDATE/DELETE."""
         self._cursor.execute(q, p)
         self._conn.commit()
 
     def fetchone(self, q, p=()):
+        """Mengambil satu data."""
         self._cursor.execute(q, p)
         return self._cursor.fetchone()
 
     def fetchall(self, q, p=()):
+        """Mengambil banyak data."""
         self._cursor.execute(q, p)
         return self._cursor.fetchall()
 
 
 class UserRepository:
+    """
+    Repository khusus tabel users.
+    """
     def __init__(self, db: Database):
         self._db = db
 
@@ -84,6 +98,9 @@ class UserRepository:
 
 
 class ProdukRepository:
+    """
+    Repository khusus tabel produk.
+    """
     def __init__(self, db: Database):
         self._db = db
 
@@ -111,6 +128,9 @@ class ProdukRepository:
 
 
 class TransaksiRepository:
+    """
+    Repository khusus transaksi dan detail transaksi.
+    """
     def __init__(self, db: Database):
         self._db = db
 
@@ -138,9 +158,16 @@ class TransaksiRepository:
         if not trx:
             raise TransaksiTidakDitemukanError(f"Transaksi ID {transaksi_id} tidak ditemukan")
         return trx
-
-    def cancel(self, transaksi_id):
-        trx = self.findById(transaksi_id)
-        if trx[3] == "dibatalkan":
-            raise TransaksiSudahDibatalkanError(f"Transaksi ID {transaksi_id} sudah dibatalkan")
-        self._db.execute("UPDATE transaksi SET status='dibatalkan' WHERE id=?", (transaksi_id,))
+    
+    def findDetailByTransaksi(self, transaksi_id):
+        """
+        Mengambil detail transaksi.
+        """
+        return self._db.fetchall(
+            """
+            SELECT p.nama, ti.qty, ti.harga, (ti.qty * ti.harga) AS subtotal
+            FROM transaksi_item ti JOIN produk p ON ti.produk_id = p.id
+            WHERE ti.transaksi_id = ?
+            """,
+            (transaksi_id,)
+        )
